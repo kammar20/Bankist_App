@@ -61,7 +61,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-// display movements
+//? display movements
 const displayMoments = function (movements) {
   // empty the container first
   containerMovements.innerHTML = '';
@@ -74,7 +74,7 @@ const displayMoments = function (movements) {
       i + 1
     } ${type}</div>
         <div class="movements__date">3 days ago</div>
-        <div class="movements__value">${mov}</div>
+        <div class="movements__value">${mov}€</div>
       </div>
     `;
 
@@ -82,18 +82,108 @@ const displayMoments = function (movements) {
   });
 };
 
-displayMoments(account1.movements);
+//? Display Current Balance
+const diplayBalance = function (accMove) {
+  const balance = accMove.reduce(function (acc, crr) {
+    return acc + crr;
+  }, 0);
+
+  labelBalance.textContent = `${balance}€`;
+};
+
+//? Calculate display Summary
+const calDisplaySummary = function (acc) {
+  ///Income
+  const income = acc.movements
+    .filter(move => move > 0)
+    .reduce(function (acc, crr) {
+      return acc + crr;
+    }, 0);
+  labelSumIn.textContent = `${income}€`;
+
+  /// out
+  const out = acc.movements
+    .filter(move => move < 0)
+    .reduce(function (acc, crr) {
+      return acc + crr;
+    }, 0);
+
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+
+  /// interest (on every deposit 1,2%)
+  const interest = acc.movements
+    .filter(move => move > 0)
+    .map(function (deposit) {
+      return (deposit * acc.interestRate) / 100;
+    })
+    .filter(function (int) {
+      return int >= 1;
+    })
+    .reduce(function (acc, crr) {
+      return acc + crr;
+    }, 0);
+
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+//? create userName initials
+//? 'Steven Thomas Williams', // stw
+const createUserName = function (accs) {
+  accs.forEach(function (acc) {
+    acc.userName = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(function (name) {
+        return name[0];
+      })
+      .join('');
+  });
+};
+createUserName(accounts);
+
+// user
+let currentAccount;
+//? Login user
+btnLogin.addEventListener('click', function (event) {
+  event.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.userName === inputLoginUsername.value
+  );
+
+  console.log(currentAccount);
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    console.log('Login');
+  }
+
+  // display welcome
+  labelWelcome.textContent = `"Welcome Back, ${
+    currentAccount.owner.split(' ')[0]
+  }"`;
+
+  // disply ui
+  containerApp.style.opacity = '100';
+
+  // clear input field
+
+  inputLoginUsername.value = inputLoginPin.value = '';
+
+  inputLoginPin.blur();
+
+  // movement
+  displayMoments(currentAccount.movements);
+
+  // balance
+  diplayBalance(currentAccount.movements);
+
+  //summary
+  calDisplaySummary(currentAccount);
+});
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
 
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
-
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// Find Maximum Value from Array using Reduce.
 
 /////////////////////////////////////////////////

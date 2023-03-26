@@ -21,7 +21,6 @@ body {
   background-color: #f3f3f3;
   height: 100vh;
   padding: 2rem;
-  background-color: rgb(161, 176, 207);
 }
 
 nav {
@@ -95,7 +94,7 @@ nav {
   gap: 2rem;
 
   /* NOTE This creates the fade in/out anumation */
-  /* opacity: 0; */
+  opacity: 0;
   transition: all 1s;
 }
 
