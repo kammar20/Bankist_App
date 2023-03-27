@@ -83,12 +83,12 @@ const displayMoments = function (movements) {
 };
 
 //? Display Current Balance
-const diplayBalance = function (accMove) {
-  const balance = accMove.reduce(function (acc, crr) {
+const diplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce(function (acc, crr) {
     return acc + crr;
   }, 0);
 
-  labelBalance.textContent = `${balance}€`;
+  labelBalance.textContent = `${acc.balance}€`;
 };
 
 //? Calculate display Summary
@@ -141,7 +141,19 @@ const createUserName = function (accs) {
 };
 createUserName(accounts);
 
-// user
+// update ui
+const updateUi = function (acc) {
+  // Display movement
+  displayMoments(acc.movements);
+
+  // Display  balance
+  diplayBalance(acc);
+
+  // Display summary
+  calDisplaySummary(acc);
+};
+
+// user Login
 let currentAccount;
 //? Login user
 btnLogin.addEventListener('click', function (event) {
@@ -151,33 +163,58 @@ btnLogin.addEventListener('click', function (event) {
     acc => acc.userName === inputLoginUsername.value
   );
 
-  console.log(currentAccount);
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
-    console.log('Login');
+    // console.log('Login');
+
+    // display welcome
+    labelWelcome.textContent = `"Welcome Back, ${
+      currentAccount.owner.split(' ')[0]
+    }"`;
+
+    // disply ui
+    containerApp.style.opacity = '100';
+
+    // clear input field
+
+    inputLoginUsername.value = inputLoginPin.value = '';
+
+    inputLoginPin.blur();
+
+    // update ui
+    updateUi(currentAccount);
+  }
+});
+
+// Transfer Money
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+
+  const reciverAccount = accounts.find(
+    acc => acc.userName === inputTransferTo.value
+  );
+
+  if (
+    amount > 0 &&
+    reciverAccount &&
+    currentAccount.balance >= amount &&
+    reciverAccount?.userName !== currentAccount.userName
+  ) {
+    // doing transfer
+    // negative current account
+    currentAccount.movements.push(-amount);
+
+    // postive movement account
+    reciverAccount.movements.push(amount);
+
+    // update ui
+    updateUi(currentAccount);
   }
 
-  // display welcome
-  labelWelcome.textContent = `"Welcome Back, ${
-    currentAccount.owner.split(' ')[0]
-  }"`;
+  inputTransferTo.value = inputTransferAmount.value = '';
 
-  // disply ui
-  containerApp.style.opacity = '100';
-
-  // clear input field
-
-  inputLoginUsername.value = inputLoginPin.value = '';
-
-  inputLoginPin.blur();
-
-  // movement
-  displayMoments(currentAccount.movements);
-
-  // balance
-  diplayBalance(currentAccount.movements);
-
-  //summary
-  calDisplaySummary(currentAccount);
+  inputTransferAmount.blur();
 });
 
 /////////////////////////////////////////////////
